@@ -14,12 +14,12 @@ const router = express.Router()
 /**
  * [GET] /auth/google/login
  */
-router.get('/google/login', middlewarePassportGoogle)
+// router.get('/google/login', middlewarePassportGoogle)
 
 /**
  * [GET] /auth/google/callback
  */
-router.get('/google/callback', middlewarePassportGoogleCallback)
+// router.get('/google/callback', middlewarePassportGoogleCallback)
 
 /**
  * [POST] /auth/signup

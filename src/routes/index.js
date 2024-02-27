@@ -1,9 +1,9 @@
 import express from 'express'
 import { ReasonPhrases } from 'http-status-codes'
-import { NotFoundException } from '~/helpers/ErrorResponse'
 import authRoute from './auth'
 import { middlewarePassportJwt } from '~/middlewares/passportMiddleware'
 import asyncHandler from '~/helpers/asyncHandler'
+import { NotFoundException } from '~/core/ErrorResponse'
 
 const router = express.Router()
 

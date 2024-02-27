@@ -5,7 +5,8 @@ const DOCUMENT_NAME = 'User'
 
 const userSchema = new mongoose.Schema(
   {
-    email: { type: String, unique: true, required: true },
+    displayName: { type: String, required: true, trim: true, minlength: 3, maxlength: 20 },
+    email: { type: String, unique: true, required: true, trim: true },
     password: { type: String, required: true },
     refreshToken: { type: String },
   },

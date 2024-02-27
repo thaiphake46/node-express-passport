@@ -1,5 +1,5 @@
 import passport from 'passport'
-import { UnauthorizedException } from '~/helpers/ErrorResponse'
+import { UnauthorizedException } from '~/core/ErrorResponse'
 
 export const middlewarePassportLocal = (req, res, next) => {
   passport.authenticate('local', (err, user) => {
