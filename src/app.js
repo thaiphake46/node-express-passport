@@ -1,29 +1,20 @@
 import express from 'express'
-import helmet from 'helmet'
-import morgan from 'morgan'
-import compression from 'compression'
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
 import appRoute from './routes'
 import errorHandling from './middlewares/errorHandling'
-import initPassport from './passport'
 import ConnectMongo from './config/ConnectMongo'
+import appConfig from './config/appConfig'
+import appPassport from './passport'
 
 const app = express()
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser())
-app.use(helmet())
-app.use(morgan('dev'))
-app.use(compression())
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+// app config
+appConfig(app)
 
 // connect mongo
 ConnectMongo.getInstance()
 
 // passport
-initPassport()
+appPassport()
 
 // routes
 app.use('/', appRoute)

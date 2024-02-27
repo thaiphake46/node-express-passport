@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
+import env from './env'
 
-const MONGO_CONNECT_STRING = process.env.MONGO_CONNECT_STRING
+const MONGO_CONNECT_STRING = env.MONGO_CONNECT_STRING
 
 class ConnectMongo {
   constructor() {

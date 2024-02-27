@@ -4,6 +4,11 @@ import { pickKeys } from '~/utils'
 import { ConflictException } from '~/helpers/ErrorResponse'
 import { JWT_MAX_AGE_REFRESH_TOKEN, signAccessToken, signRefreshToken } from '~/services/jwtService'
 
+/**
+ * signUp
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const signUp = async (req, res, next) => {
   const { username, email, password } = req.body
   const user = await UserSchema.findOne({ email }).lean()
@@ -22,6 +27,11 @@ export const signUp = async (req, res, next) => {
   })
 }
 
+/**
+ * signIn
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const signIn = (req, res, next) => {
   const user = req.user
 
