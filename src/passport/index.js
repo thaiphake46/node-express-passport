@@ -2,9 +2,12 @@ import bcrypt from 'bcrypt'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { UserSchema } from '~/schemas/user'
+import env from '~/config/env'
 
-const initPassport = () => {
+export default function appPassport() {
+  // passport local
   passport.use(
     new LocalStrategy(
       { usernameField: 'email', passwordField: 'password' },
@@ -22,11 +25,12 @@ const initPassport = () => {
     ),
   )
 
+  // passport jwt
   passport.use(
     new JwtStrategy(
       {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: process.env.JWT_SECRET_ACCESS_TOKEN,
+        secretOrKey: env.JWT_SECRET_ACCESS_TOKEN,
       },
       async (jwtPayload, done) => {
         try {
@@ -42,35 +46,42 @@ const initPassport = () => {
     ),
   )
 
-  // const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-  // const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
+  // passport google
+  // const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID
+  // const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET
 
   // passport.use(
   //   new GoogleStrategy(
   //     {
   //       clientID: GOOGLE_CLIENT_ID,
   //       clientSecret: GOOGLE_CLIENT_SECRET,
-  //       callbackURL: 'http://localhost',
-  //       scope: ['profile'],
+  //       callbackURL: '/auth/google/callback',
+  //       // scope: ['profile', 'email'],
   //     },
-  //     async (accessToken, refreshToken, profile, cb) => {
+  //     async (accessToken, refreshToken, profile, done) => {
   //       try {
-  //         let user = await User.findOne({ googleId: profile.id })
+  //         let user = await UserSchema.findOne({ googleId: profile.id })
 
-  //         console.log('passport google oauth ::', accessToken)
-  //         console.log('passport google oauth ::', refreshToken)
-  //         console.log('passport google oauth ::', profile)
-  //         console.log('passport google oauth ::', user)
+  //         // if (!user) user = await UserSchema.create(profile)
 
-  //         if (!user) user = await User.create(profile)
-
-  //         cb(null, user)
+  //         done(null, user, { accessToken, refreshToken, profile })
   //       } catch (error) {
-  //         return cb(error)
+  //         return done(error)
   //       }
   //     },
   //   ),
   // )
-}
 
-export default initPassport
+  passport.serializeUser((user, done) => {
+    done(null, user._id)
+  })
+
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const user = await UserSchema.findById(id)
+      done(null, user ? user : false)
+    } catch (error) {
+      return done(error)
+    }
+  })
+}
