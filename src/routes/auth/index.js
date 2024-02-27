@@ -6,13 +6,34 @@ import {
   middlewarePassportGoogleCallback,
   middlewarePassportLocal,
 } from '~/middlewares/passportMiddleware'
-import { validationAuth, validationUser } from '~/middlewares/validationMiddleware'
+import { validationReqBody } from '~/middlewares/validationMiddleware'
+import { signInValid, signUpValid } from '~/Joi'
 
 const router = express.Router()
 
-router.post('/signup', validationUser, asyncHandler(signUp))
-router.post('/signin', validationAuth, middlewarePassportLocal, asyncHandler(signIn))
+/**
+ * [GET] /auth/google/login
+ */
+router.get('/google/login', middlewarePassportGoogle)
 
-router.get('/auth', middlewarePassportGoogle)
+/**
+ * [GET] /auth/google/callback
+ */
 router.get('/google/callback', middlewarePassportGoogleCallback)
+
+/**
+ * [POST] /auth/signup
+ */
+router.post('/signup', validationReqBody(signUpValid), asyncHandler(signUp))
+
+/**
+ * [POST] /auth/signin
+ */
+router.post(
+  '/signin',
+  validationReqBody(signInValid),
+  middlewarePassportLocal,
+  asyncHandler(signIn),
+)
+
 export default router

@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "nodemon --exec babel-node src/server.js",
     "format": "prettier src/**/* --write",
-    "lint": "eslint src/**/*",
+    "lint": "eslint src/**/*.js",
     "prepare": "husky install"
   },
   "lint-staged": {
-    "./src/*.js": "eslint --cache --fix",
+    "./src/**/*.js": "eslint --cache --fix",
     "./src/**/*.{js,json}": "npm run format"
   },
   "keywords": [],
