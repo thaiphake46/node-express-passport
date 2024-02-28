@@ -6,6 +6,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import passport from 'passport'
 import session from 'express-session'
+import MongoStore from 'connect-mongo'
 import env from './env'
 
 /**
@@ -19,14 +20,19 @@ export default function appConfig(app) {
   app.use(morgan('dev'))
   app.use(compression())
   app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+
+  if (env.NODE_ENV === 'production') {
+    // app.set('trust proxy', 1)
+    // session.cookie.secure = true
+  }
+
   app.use(
     session({
       secret: env.SESSION_SECRET,
       resave: false,
       saveUninitialized: true,
+      store: MongoStore.create({ mongoUrl: env.MONGO_CONNECT_STRING }),
       cookie: {
-        // name: 'session',
-        // keys: ['NucMD'],
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       },
     }),

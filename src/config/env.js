@@ -1,6 +1,7 @@
 const { cleanEnv, port, str } = require('envalid')
 
 const env = cleanEnv(process.env, {
+  NODE_ENV: str({ choices: ['development', 'test', 'production', 'staging'] }),
   PORT: port(),
   SESSION_SECRET: str(),
   MONGO_CONNECT_STRING: str(),
