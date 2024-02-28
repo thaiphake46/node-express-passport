@@ -15,7 +15,7 @@ class ConnectMongo {
         console.log(`- Mongo connection successful`)
       })
       .catch(() => {
-        console.log(`- Mongo connection failed`)
+        throw new Error('- Mongo connection failed')
       })
   }
 
