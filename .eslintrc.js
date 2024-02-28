@@ -21,6 +21,7 @@ module.exports = {
   },
   rules: {
     'no-undef': 'error',
+    'no-console': 'warn',
     'no-undefined': 'error',
     'no-undef-init': 'error',
     'no-unused-vars': 'warn',
