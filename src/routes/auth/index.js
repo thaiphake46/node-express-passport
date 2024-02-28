@@ -7,19 +7,19 @@ import {
   middlewarePassportLocal,
 } from '~/middlewares/passportMiddleware'
 import { validationReqBody } from '~/middlewares/validationMiddleware'
-import { signInValid, signUpValid } from '~/Joi'
+import { signInValid, signUpValid } from '~/schemas/Joi'
 
 const router = express.Router()
 
 /**
  * [GET] /auth/google/login
  */
-// router.get('/google/login', middlewarePassportGoogle)
+router.get('/google', middlewarePassportGoogle)
 
 /**
  * [GET] /auth/google/callback
  */
-// router.get('/google/callback', middlewarePassportGoogleCallback)
+router.get('/google/callback', middlewarePassportGoogleCallback)
 
 /**
  * [POST] /auth/signup

@@ -24,18 +24,19 @@ export const middlewarePassportJwt = (req, res, next) => {
 }
 
 export const middlewarePassportGoogle = (req, res, next) => {
-  passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next)
+  passport.authenticate('google', { scope: ['email', 'profile'] })(req, res, next)
 }
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ */
 export const middlewarePassportGoogleCallback = (req, res, next) => {
   passport.authenticate('google', (err, user, info) => {
     if (err) return next(err)
 
-    // if (!user) return next(new UnauthorizedException(`Invalid token`))
-
     req.user = user
-    console.log('info google callback', info)
-    res.json({ user, info })
-    // next()
+    console.log(req.session)
+    res.json({ user })
   })(req, res, next)
 }

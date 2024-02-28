@@ -3,8 +3,11 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
-import { UserSchema } from '~/schemas/user'
+import { User } from '~/schemas/user'
 import env from '~/config/env'
+
+const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID
+const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET
 
 export default function appPassport() {
   // passport local
@@ -13,7 +16,7 @@ export default function appPassport() {
       { usernameField: 'email', passwordField: 'password' },
       async (email, password, done) => {
         try {
-          const user = await UserSchema.findOne({ email }).exec()
+          const user = await User.findOne({ email }).exec()
 
           if (!user || !(await bcrypt.compare(password, user.password))) return done(null, false)
 
@@ -34,7 +37,7 @@ export default function appPassport() {
       },
       async (jwtPayload, done) => {
         try {
-          const user = await UserSchema.findById(jwtPayload.sub).exec()
+          const user = await User.findById(jwtPayload.sub).exec()
 
           if (!user) return done(null, false)
 
@@ -47,30 +50,34 @@ export default function appPassport() {
   )
 
   // passport google
-  // const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID
-  // const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: '/auth/google/callback',
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await User.findOne({ email: profile.emails[0].value })
 
-  // passport.use(
-  //   new GoogleStrategy(
-  //     {
-  //       clientID: GOOGLE_CLIENT_ID,
-  //       clientSecret: GOOGLE_CLIENT_SECRET,
-  //       callbackURL: '/auth/google/callback',
-  //       // scope: ['profile', 'email'],
-  //     },
-  //     async (accessToken, refreshToken, profile, done) => {
-  //       try {
-  //         let user = await UserSchema.findOne({ googleId: profile.id })
+          if (!user) {
+            user = await User.create({
+              displayName: profile.displayName,
+              email: profile.emails[0].value,
+              email_verified: profile.emails[0].verified,
+              avatar: profile.photos[0].value,
+              provider: { strategy: profile.provider, id: profile.id },
+            })
+          }
 
-  //         // if (!user) user = await UserSchema.create(profile)
-
-  //         done(null, user, { accessToken, refreshToken, profile })
-  //       } catch (error) {
-  //         return done(error)
-  //       }
-  //     },
-  //   ),
-  // )
+          done(null, user)
+        } catch (error) {
+          return done(error)
+        }
+      },
+    ),
+  )
 
   passport.serializeUser((user, done) => {
     done(null, user._id)
@@ -78,7 +85,7 @@ export default function appPassport() {
 
   passport.deserializeUser(async (id, done) => {
     try {
-      const user = await UserSchema.findById(id)
+      const user = await User.findById(id)
       done(null, user ? user : false)
     } catch (error) {
       return done(error)

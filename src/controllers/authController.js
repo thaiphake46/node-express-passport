@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { UserSchema } from '~/schemas/user'
+import { User } from '~/schemas/user'
 import { pickKeys } from '~/utils'
 import { JWT_MAX_AGE_REFRESH_TOKEN, signAccessToken, signRefreshToken } from '~/services/jwtService'
 import { ConflictException } from '~/core/ErrorResponse'
@@ -11,11 +11,11 @@ import { ConflictException } from '~/core/ErrorResponse'
  */
 export const signUp = async (req, res, next) => {
   const { username, email, password, displayName } = req.body
-  const user = await UserSchema.findOne({ email }).lean()
+  const user = await User.findOne({ email }).lean()
 
   if (user) throw new ConflictException(`User already`)
 
-  const newUser = await UserSchema.create({
+  const newUser = await User.create({
     displayName,
     username,
     email,
