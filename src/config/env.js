@@ -4,6 +4,8 @@ const env = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'test', 'production', 'staging'] }),
   PORT: port(),
   SESSION_SECRET: str(),
+  SESSION_COOKIE_EXPIRESIN: str(),
+
   MONGO_CONNECT_STRING: str(),
 
   JWT_SECRET_ACCESS_TOKEN: str(),

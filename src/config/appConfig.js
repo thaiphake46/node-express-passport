@@ -9,6 +9,9 @@ import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import env from './env'
 import path from 'path'
+import ms from 'ms'
+
+const SESSION_COOKIE_EXPIRESIN = ms(env.SESSION_COOKIE_EXPIRESIN)
 
 /**
  * @param {Express} app Express
@@ -39,7 +42,7 @@ export default function appConfig(app) {
       saveUninitialized: true,
       store: MongoStore.create({ mongoUrl: env.MONGO_CONNECT_STRING }),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: SESSION_COOKIE_EXPIRESIN,
       },
     }),
   )
