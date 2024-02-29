@@ -8,6 +8,7 @@ import passport from 'passport'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import env from './env'
+import path from 'path'
 
 /**
  * @param {Express} app Express
@@ -19,7 +20,12 @@ export default function appConfig(app) {
   app.use(helmet())
   app.use(morgan('dev'))
   app.use(compression())
-  app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+  app.use(
+    cors({
+      origin: 'http://localhost:5173',
+      credentials: true,
+    }),
+  )
 
   if (env.NODE_ENV === 'production') {
     // app.set('trust proxy', 1)
@@ -39,4 +45,8 @@ export default function appConfig(app) {
   )
   app.use(passport.initialize())
   app.use(passport.session())
+
+  app.set('views', path.join(process.cwd(), 'src/views'))
+  app.set('view engine', 'ejs')
+  app.use(express.static(path.join(process.cwd(), 'public')))
 }
