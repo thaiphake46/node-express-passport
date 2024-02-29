@@ -5,7 +5,6 @@ import { StatusCodes } from 'http-status-codes'
  */
 export const validationReqBody = (schema) => {
   return (req, res, next) => {
-    console.log(req.body)
     const { error } = schema.validate(req.body, { abortEarly: false })
 
     if (error) {

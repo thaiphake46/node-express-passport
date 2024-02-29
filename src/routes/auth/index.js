@@ -1,6 +1,6 @@
 import express from 'express'
 import asyncHandler from '~/helpers/asyncHandler'
-import { signIn, signUp } from '~/controllers/authController'
+import { signIn, signInGoogle, signInGoogleCallback, signUp } from '~/controllers/authController'
 import {
   middlewarePassportGoogle,
   middlewarePassportGoogleCallback,
@@ -12,14 +12,16 @@ import { signInValid, signUpValid } from '~/schemas/Joi'
 const router = express.Router()
 
 /**
- * [GET] /auth/google/login
+ * [GET] /auth/login-google -> redirect to /auth/google
+ * [GET] /auth/google
  */
+router.get('/signin-google', asyncHandler(signInGoogle))
 router.get('/google', middlewarePassportGoogle)
 
 /**
  * [GET] /auth/google/callback
  */
-router.get('/google/callback', middlewarePassportGoogleCallback)
+router.get('/google/callback', middlewarePassportGoogleCallback, asyncHandler(signInGoogleCallback))
 
 /**
  * [POST] /auth/signup

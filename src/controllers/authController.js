@@ -1,11 +1,17 @@
 import bcrypt from 'bcrypt'
 import { User } from '~/schemas/user'
-import { pickKeys } from '~/utils'
-import { JWT_MAX_AGE_REFRESH_TOKEN, signAccessToken, signRefreshToken } from '~/services/jwtService'
+import { omitKeys, pickKeys } from '~/utils'
 import { ConflictException } from '~/core/ErrorResponse'
+import { CreatedSuccess, OKSuccess, SuccessResponse } from '~/core/SuccessResponse'
+import {
+  JWT_MAX_AGE_ACCESS_TOKEN,
+  JWT_MAX_AGE_REFRESH_TOKEN,
+  signAccessToken,
+  signRefreshToken,
+} from '~/services/jwtService'
 
 /**
- * signUp
+ * signUp - local
  * @param {Request} req
  * @param {Response} res
  */
@@ -22,14 +28,12 @@ export const signUp = async (req, res, next) => {
     password: await bcrypt.hash(password, 10),
   })
 
-  return res.json({
-    msg: 'Sign up success',
-    user: pickKeys(newUser.toJSON(), ['_id', 'username', 'email']),
-  })
+  // return CreatedSuccess
+  return res.json({})
 }
 
 /**
- * signIn
+ * signIn - local
  * @param {Request} req
  * @param {Response} res
  */
@@ -41,17 +45,56 @@ export const signIn = (req, res, next) => {
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
 
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
-    sameSite: 'strict',
-  })
+  res
+    .cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_ACCESS_TOKEN,
+      sameSite: 'strict',
+    })
+    .cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
+      sameSite: 'strict',
+    })
 
-  return res.status(200).json({
-    token: {
-      accessToken,
-      refreshToken,
-    },
-    user: pickKeys(user, ['_id', 'username', 'email']),
-  })
+  // return OKSuccess
+  return res.status(200).json({})
+}
+
+/**
+ * signInGoogle
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const signInGoogle = (req, res, next) => {
+  const redirectUrl = req.query.redirectUrl
+  req.session.redirectUrl = redirectUrl
+  res.redirect('/auth/google')
+}
+
+/**
+ * signInGoogleCallback
+ * @param {Request} req
+ * @param {Response} res
+ */
+export const signInGoogleCallback = (req, res, next) => {
+  const user = req.user
+  const payload = { sub: user._id, email: user.email }
+
+  const accessToken = signAccessToken(payload)
+  const refreshToken = signRefreshToken(payload)
+
+  res
+    .cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_ACCESS_TOKEN,
+      sameSite: 'strict',
+    })
+    .cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
+      sameSite: 'strict',
+    })
+
+  return res.redirect(req.session.redirectUrl)
 }

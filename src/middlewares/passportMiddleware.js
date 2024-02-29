@@ -36,7 +36,7 @@ export const middlewarePassportGoogleCallback = (req, res, next) => {
     if (err) return next(err)
 
     req.user = user
-    console.log(req.session)
-    res.json({ user })
+
+    next()
   })(req, res, next)
 }
