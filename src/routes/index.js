@@ -1,5 +1,4 @@
 import express from 'express'
-import { ReasonPhrases } from 'http-status-codes'
 import authRoute from './auth'
 import { middlewarePassportJwt } from '~/middlewares/passportMiddleware'
 import asyncHandler from '~/helpers/asyncHandler'
@@ -20,7 +19,7 @@ router.get(
 )
 
 router.use((req, res, next) => {
-  const err = new NotFoundException(`URL ${ReasonPhrases.NOT_FOUND}`)
+  const err = new NotFoundException(`URL Not Found: ${req.url} `)
   return next(err)
 })
 
