@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
-import UserRole from '~/core/userRole'
+import UserProvider from '~/helpers/userProvider'
+import UserRole from '~/helpers/userRole'
 
 const COLLECTION_NAME = 'Users'
 const DOCUMENT_NAME = 'User'
@@ -30,8 +31,13 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     provider: {
-      strategy: { type: String, enum: ['google', 'facebook'] },
-      id: { type: String },
+      strategy: {
+        type: String,
+        enum: [UserProvider.GOOGLE, UserProvider.FACEBOOK],
+      },
+      id: {
+        type: String,
+      },
     },
     role: {
       type: String,
