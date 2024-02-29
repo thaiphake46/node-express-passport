@@ -5,7 +5,7 @@ export class ErrorResponse extends Error {
     super(message)
     this.name = 'ErrorResponse'
     this.statusCode = statusCode ?? StatusCodes.BAD_REQUEST
-    this.message = message || getReasonPhrase(this.statusCode)
+    this.msg = message || getReasonPhrase(this.statusCode)
     this.options = options instanceof Object && Object.keys(options).length > 0 ? options : {}
     Error.captureStackTrace(this, this.constructor)
   }
