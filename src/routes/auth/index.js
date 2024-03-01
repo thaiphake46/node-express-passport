@@ -5,7 +5,7 @@ import {
   middlewarePassportGoogle,
   middlewarePassportGoogleCallback,
   middlewarePassportLocal,
-} from '~/middlewares/passportMiddleware'
+} from '~/middlewares/authMiddleware'
 import { validationReqBody } from '~/middlewares/validationMiddleware'
 import { signInValid, signUpValid } from '~/schemas/Joi'
 

@@ -1,14 +1,33 @@
 import bcrypt from 'bcrypt'
 import { User } from '~/schemas/user'
-import { omitKeys, pickKeys } from '~/utils'
 import { ConflictException } from '~/core/ErrorResponse'
-import { CreatedSuccess, OKSuccess, SuccessResponse } from '~/core/SuccessResponse'
+import { CreatedSuccess, OKSuccess } from '~/core/SuccessResponse'
 import {
   JWT_MAX_AGE_ACCESS_TOKEN,
   JWT_MAX_AGE_REFRESH_TOKEN,
   signAccessToken,
   signRefreshToken,
 } from '~/services/jwtService'
+
+const setCookieSignInSuccess = (res, user) => {
+  const payload = { sub: user._id, email: user.email }
+
+  const accessToken = signAccessToken(payload)
+  const refreshToken = signRefreshToken(payload)
+
+  // set cookie after sign up / sign in
+  res
+    .cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_ACCESS_TOKEN,
+      sameSite: 'strict',
+    })
+    .cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
+      sameSite: 'strict',
+    })
+}
 
 /**
  * signUp - local
@@ -28,8 +47,10 @@ export const signUp = async (req, res, next) => {
     password: await bcrypt.hash(password, 10),
   })
 
-  // return CreatedSuccess
-  return res.json({})
+  setCookieSignInSuccess(res, newUser)
+
+  // response CreatedSuccess
+  return res.json(new CreatedSuccess())
 }
 
 /**
@@ -40,31 +61,14 @@ export const signUp = async (req, res, next) => {
 export const signIn = (req, res, next) => {
   const user = req.user
 
-  const payload = { sub: user._id, email: user.email }
+  setCookieSignInSuccess(res, user)
 
-  const accessToken = signAccessToken(payload)
-  const refreshToken = signRefreshToken(payload)
-
-  res
-    .cookie('accessToken', accessToken, {
-      httpOnly: true,
-      maxAge: JWT_MAX_AGE_ACCESS_TOKEN,
-      sameSite: 'strict',
-    })
-    .cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
-      sameSite: 'strict',
-    })
-
-  // return OKSuccess
-  return res.status(200).json({})
+  // response OKSuccess
+  return res.status(200).json(new OKSuccess())
 }
 
 /**
  * signInGoogle
- * @param {Request} req
- * @param {Response} res
  */
 export const signInGoogle = (req, res, next) => {
   const redirectUrl = req.query.redirectUrl
@@ -79,22 +83,9 @@ export const signInGoogle = (req, res, next) => {
  */
 export const signInGoogleCallback = (req, res, next) => {
   const user = req.user
-  const payload = { sub: user._id, email: user.email }
 
-  const accessToken = signAccessToken(payload)
-  const refreshToken = signRefreshToken(payload)
+  setCookieSignInSuccess(res, user)
 
-  res
-    .cookie('accessToken', accessToken, {
-      httpOnly: true,
-      maxAge: JWT_MAX_AGE_ACCESS_TOKEN,
-      sameSite: 'strict',
-    })
-    .cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
-      sameSite: 'strict',
-    })
-
+  // redirect to client
   return res.redirect(req.session.redirectUrl)
 }
