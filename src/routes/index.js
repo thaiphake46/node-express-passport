@@ -1,6 +1,6 @@
 import express from 'express'
 import authRoute from './auth'
-import { middlewarePassportJwt } from '~/middlewares/passportMiddleware'
+import { middlewarePassportJwt } from '~/middlewares/authMiddleware'
 import asyncHandler from '~/helpers/asyncHandler'
 import { NotFoundException } from '~/core/ErrorResponse'
 
