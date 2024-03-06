@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
-import UserProvider from '~/helpers/userProvider'
+import UserSocicalProvider from '~/helpers/userSocicalProvider'
 import UserRole from '~/helpers/userRole'
+import { JWT_MAX_AGE_REFRESH_TOKEN } from '~/services/jwtService'
 
 const COLLECTION_NAME = 'Users'
 const DOCUMENT_NAME = 'User'
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
     provider: {
       strategy: {
         type: String,
-        enum: [UserProvider.GOOGLE, UserProvider.FACEBOOK],
+        enum: [UserSocicalProvider.LOCAL, UserSocicalProvider.GOOGLE, UserSocicalProvider.FACEBOOK],
       },
       id: {
         type: String,
@@ -48,7 +49,8 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     refreshToken: {
-      type: String,
+      expires: JWT_MAX_AGE_REFRESH_TOKEN / 1000, // thời gian tính bằng giây (second)
+      type: Date,
     },
   },
   {
