@@ -12,10 +12,11 @@ class ConnectMongo {
     mongoose
       .connect(MONGO_CONNECT_STRING)
       .then(() => {
+        // eslint-disable-next-line no-console
         console.log(`- Mongo connection successful`)
       })
-      .catch(() => {
-        throw new Error('- Mongo connection failed')
+      .catch((err) => {
+        throw err
       })
   }
 

@@ -39,7 +39,7 @@ export default function appConfig(app) {
     session({
       secret: env.SESSION_SECRET,
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
       store: MongoStore.create({ mongoUrl: env.MONGO_CONNECT_STRING }),
       cookie: {
         maxAge: SESSION_COOKIE_EXPIRESIN,
