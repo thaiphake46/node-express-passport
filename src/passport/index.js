@@ -18,7 +18,8 @@ export default function appPassport() {
         try {
           const user = await User.findOne({ email }).exec()
 
-          if (!user || !(await bcrypt.compare(password, user.password))) return done(null, false)
+          if (!user || !(await bcrypt.compare(password, user.password)))
+            return done(null, false, { message: 'Username or password incorrect' })
 
           return done(null, user)
         } catch (error) {
@@ -39,7 +40,7 @@ export default function appPassport() {
         try {
           const user = await User.findById(jwtPayload.sub).exec()
 
-          if (!user) return done(null, false)
+          if (!user) return done(null, false, { message: 'Invalid token' })
 
           return done(null, user)
         } catch (error) {
@@ -86,7 +87,10 @@ export default function appPassport() {
   passport.deserializeUser(async (id, done) => {
     try {
       const user = await User.findById(id)
-      done(null, user ? user : false)
+
+      if (!user) return done(null, false)
+
+      return done(null, user)
     } catch (error) {
       return done(error)
     }

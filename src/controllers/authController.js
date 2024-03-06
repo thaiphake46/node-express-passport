@@ -9,12 +9,7 @@ import {
   signRefreshToken,
 } from '~/services/jwtService'
 
-const setCookieSignInSuccess = (res, user) => {
-  const payload = { sub: user._id, email: user.email }
-
-  const accessToken = signAccessToken(payload)
-  const refreshToken = signRefreshToken(payload)
-
+const setCookieSignInSuccess = (res, { accessToken, refreshToken }) => {
   // set cookie after sign up / sign in
   res
     .cookie('accessToken', accessToken, {
@@ -31,23 +26,25 @@ const setCookieSignInSuccess = (res, user) => {
 
 /**
  * signUp - local
- * @param {Request} req
- * @param {Response} res
  */
 export const signUp = async (req, res, next) => {
-  const { username, email, password, displayName } = req.body
+  const { email, password, displayName } = req.body
   const user = await User.findOne({ email }).lean()
 
   if (user) throw new ConflictException(`User already`)
 
   const newUser = await User.create({
     displayName,
-    username,
     email,
     password: await bcrypt.hash(password, 10),
   })
 
-  setCookieSignInSuccess(res, newUser)
+  const payload = { sub: newUser._id, email: newUser.email }
+
+  const accessToken = signAccessToken(payload)
+  const refreshToken = signRefreshToken(payload)
+
+  setCookieSignInSuccess(res, { accessToken, refreshToken })
 
   // response CreatedSuccess
   return res.json(new CreatedSuccess())
@@ -55,15 +52,17 @@ export const signUp = async (req, res, next) => {
 
 /**
  * signIn - local
- * @param {Request} req
- * @param {Response} res
  */
 export const signIn = (req, res, next) => {
   const user = req.user
 
-  setCookieSignInSuccess(res, user)
+  const payload = { sub: user._id, email: user.email }
 
-  // response OKSuccess
+  const accessToken = signAccessToken(payload)
+  const refreshToken = signRefreshToken(payload)
+
+  setCookieSignInSuccess(res, { accessToken, refreshToken })
+
   return res.status(200).json(new OKSuccess())
 }
 
@@ -78,13 +77,16 @@ export const signInGoogle = (req, res, next) => {
 
 /**
  * signInGoogleCallback
- * @param {Request} req
- * @param {Response} res
  */
 export const signInGoogleCallback = (req, res, next) => {
   const user = req.user
 
-  setCookieSignInSuccess(res, user)
+  const payload = { sub: user._id, email: user.email }
+
+  const accessToken = signAccessToken(payload)
+  const refreshToken = signRefreshToken(payload)
+
+  setCookieSignInSuccess(res, { accessToken, refreshToken })
 
   // redirect to client
   return res.redirect(req.session.redirectUrl)
