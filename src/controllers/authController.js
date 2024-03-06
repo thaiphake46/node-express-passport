@@ -8,6 +8,7 @@ import {
   signAccessToken,
   signRefreshToken,
 } from '~/services/jwtService'
+import { getUserByEmail } from '~/services/userService'
 
 const setCookieSignInSuccess = (res, { accessToken, refreshToken }) => {
   // set cookie after sign up / sign in
@@ -31,7 +32,7 @@ export const signUp = async (req, res, next) => {
   const { email, password, displayName } = req.body
   const user = await User.findOne({ email }).lean()
 
-  if (user) throw new ConflictException(`User already`)
+  if (user) throw new ConflictException('User already exists')
 
   const newUser = await User.create({
     displayName,
@@ -46,14 +47,14 @@ export const signUp = async (req, res, next) => {
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
-  // response CreatedSuccess
-  return res.json(new CreatedSuccess())
+  // response
+  new CreatedSuccess().json(res)
 }
 
 /**
  * signIn - local
  */
-export const signIn = (req, res, next) => {
+export const signIn = async (req, res, next) => {
   const user = req.user
 
   const payload = { sub: user._id, email: user.email }
@@ -63,7 +64,10 @@ export const signIn = (req, res, next) => {
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
-  return res.status(200).json(new OKSuccess())
+  const testUser = await getUserByEmail(user.email)
+
+  // response
+  new OKSuccess({ metadata: testUser }).json(res)
 }
 
 /**
@@ -89,5 +93,6 @@ export const signInGoogleCallback = (req, res, next) => {
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
   // redirect to client
-  return res.redirect(req.session.redirectUrl)
+  // return res.redirect(req.session.redirectUrl)
+  res.json({ user })
 }

@@ -12,7 +12,7 @@ import { signInValid, signUpValid } from '~/schemas/Joi'
 const router = express.Router()
 
 /**
- * [GET] /auth/login-google -> redirect to /auth/google
+ * [GET] /auth/signin-google -> redirect to /auth/google
  * [GET] /auth/google
  */
 router.get('/signin-google', asyncHandler(signInGoogle))

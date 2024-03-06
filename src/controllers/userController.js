@@ -6,5 +6,5 @@ export const userProfile = async (req, res, next) => {
 
   const user = await getUserByEmail(email)
 
-  res.json(new OKSuccess('', { user }))
+  new OKSuccess({ metadata: user }).json(res)
 }

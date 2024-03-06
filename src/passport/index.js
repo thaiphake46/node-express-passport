@@ -5,6 +5,8 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { User } from '~/schemas/user'
 import env from '~/config/env'
+import { getUserByEmail } from '~/services/userService'
+import UserSocicalProvider from '~/helpers/userSocicalProvider'
 
 const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID
 const GOOGLE_CLIENT_SECRET = env.GOOGLE_CLIENT_SECRET
@@ -60,7 +62,8 @@ export default function appPassport() {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ email: profile.emails[0].value })
+          // let user = await User.findOne({ email: profile.emails[0].value })
+          let user = await getUserByEmail(profile.emails[0].value)
 
           if (!user) {
             user = await User.create({
@@ -70,6 +73,8 @@ export default function appPassport() {
               avatar: profile.photos[0].value,
               provider: { strategy: profile.provider, id: profile.id },
             })
+          } else if (user.provider.strategy !== UserSocicalProvider.GOOGLE) {
+            return done(null, false, { message: 'Invalid token' })
           }
 
           done(null, user)
