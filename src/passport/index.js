@@ -5,7 +5,7 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { User } from '~/schemas/user'
 import env from '~/config/env'
-import { getUserByEmail } from '~/services/userService'
+import { getUserByEmail, getUserById } from '~/services/userService'
 import UserSocicalProvider from '~/helpers/userSocicalProvider'
 
 const GOOGLE_CLIENT_ID = env.GOOGLE_CLIENT_ID
@@ -18,7 +18,7 @@ export default function appPassport() {
       { usernameField: 'email', passwordField: 'password' },
       async (email, password, done) => {
         try {
-          const user = await User.findOne({ email }).exec()
+          const user = await getUserByEmail(email)
 
           if (!user || !(await bcrypt.compare(password, user.password)))
             return done(null, false, { message: 'Username or password incorrect' })
@@ -40,7 +40,7 @@ export default function appPassport() {
       },
       async (jwtPayload, done) => {
         try {
-          const user = await User.findById(jwtPayload.sub).exec()
+          const user = await getUserById(jwtPayload.sub)
 
           if (!user) return done(null, false, { message: 'Invalid token' })
 
@@ -62,7 +62,6 @@ export default function appPassport() {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          // let user = await User.findOne({ email: profile.emails[0].value })
           let user = await getUserByEmail(profile.emails[0].value)
 
           if (!user) {
@@ -74,7 +73,9 @@ export default function appPassport() {
               provider: { strategy: profile.provider, id: profile.id },
             })
           } else if (user.provider.strategy !== UserSocicalProvider.GOOGLE) {
-            return done(null, false, { message: 'Invalid token' })
+            return done(null, false, {
+              message: 'The user already exists and is not linked to google',
+            })
           }
 
           done(null, user)

@@ -49,8 +49,8 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     refreshToken: {
+      type: String,
       expires: JWT_MAX_AGE_REFRESH_TOKEN / 1000, // thời gian tính bằng giây (second)
-      type: Date,
     },
   },
   {

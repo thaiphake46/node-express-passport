@@ -12,13 +12,17 @@ export const JWT_MAX_AGE_ACCESS_TOKEN = ms(env.JWT_MAX_AGE_ACCESS_TOKEN)
 export const JWT_MAX_AGE_REFRESH_TOKEN = ms(env.JWT_MAX_AGE_REFRESH_TOKEN)
 
 export const signAccessToken = (payload) => {
-  return JWT.sign(payload, env.JWT_SECRET_ACCESS_TOKEN, {
+  const { _id, ...args } = payload
+  return JWT.sign(args, env.JWT_SECRET_ACCESS_TOKEN, {
     expiresIn: JWT_MAX_AGE_ACCESS_TOKEN / 1000, // thời gian tính bằng giây (second)
+    subject: _id.toString(),
   })
 }
 
 export const signRefreshToken = (payload) => {
-  return JWT.sign(payload, env.JWT_SECRET_REFRESH_TOKEN, {
+  const { _id, ...args } = payload
+  return JWT.sign(args, env.JWT_SECRET_REFRESH_TOKEN, {
     expiresIn: JWT_MAX_AGE_REFRESH_TOKEN / 1000, // thời gian tính bằng giây (second)
+    subject: _id.toString(),
   })
 }

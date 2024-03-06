@@ -1,9 +1,9 @@
 import _ from 'lodash'
 
-export const pickKeys = (obj = {}, arr = []) => {
-  return _.pick(obj, arr)
+export const pickKeys = (object = {}, arrKeys = []) => {
+  return _.pick(object, arrKeys)
 }
 
-export const omitKeys = (obj = {}, arr = []) => {
-  return _.omit(obj, arr)
+export const omitKeys = (object = {}, arrKeys = []) => {
+  return _.omit(object, arrKeys)
 }

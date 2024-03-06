@@ -1,7 +1,7 @@
-import { StatusCodes, getReasonPhrase } from 'http-status-codes'
+import { ReasonPhrases, StatusCodes, getReasonPhrase } from 'http-status-codes'
 
 export class ErrorResponse extends Error {
-  constructor(message, statusCode, options) {
+  constructor({ message, statusCode, options }) {
     super(message)
     this.name = 'ErrorResponse'
     this.statusCode = statusCode ?? StatusCodes.BAD_REQUEST
@@ -15,10 +15,13 @@ export class ErrorResponse extends Error {
  * Joi Validation Exception
  */
 export class ValidationException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.UNPROCESSABLE_ENTITY)
+  constructor(config = { message: ReasonPhrases.UNPROCESSABLE_ENTITY, options: {} }) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.UNPROCESSABLE_ENTITY,
+    })
     this.name = 'ValidationException'
-    this.error = options?.details.map((detail) => {
+    this.error = config.options?.details.map((detail) => {
       return { message: detail.message }
     })
   }
@@ -28,36 +31,81 @@ export class ValidationException extends ErrorResponse {
  * HTTP Exception
  */
 export class BadRequestException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.BAD_REQUEST, options)
+  constructor(
+    config = {
+      message: ReasonPhrases.BAD_REQUEST,
+      options: {},
+    },
+  ) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.BAD_REQUEST,
+      options: config.options,
+    })
     this.name = 'BadRequestException'
   }
 }
 
 export class UnauthorizedException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.UNAUTHORIZED, options)
+  constructor(
+    config = {
+      message: ReasonPhrases.UNAUTHORIZED,
+      options: {},
+    },
+  ) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      options: config.options,
+    })
     this.name = 'UnauthorizedException'
   }
 }
 
 export class NotFoundException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.NOT_FOUND, options)
+  constructor(
+    config = {
+      message: ReasonPhrases.NOT_FOUND,
+      options: {},
+    },
+  ) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.NOT_FOUND,
+      options: config.options,
+    })
     this.name = 'NotFoundException'
   }
 }
 
 export class ConflictException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.CONFLICT, options)
+  constructor(
+    config = {
+      message: ReasonPhrases.CONFLICT,
+      options: {},
+    },
+  ) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.CONFLICT,
+      options: {},
+    })
     this.name = 'ConflictException'
   }
 }
 
 export class UnprocessableEntityException extends ErrorResponse {
-  constructor(message, options) {
-    super(message, StatusCodes.UNPROCESSABLE_ENTITY, options)
+  constructor(
+    config = {
+      message: ReasonPhrases.UNPROCESSABLE_ENTITY,
+      options: {},
+    },
+  ) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.UNPROCESSABLE_ENTITY,
+      options: config.options,
+    })
     this.name = 'UnprocessableEntityException'
   }
 }

@@ -1,4 +1,4 @@
-import { StatusCodes, getReasonPhrase } from 'http-status-codes'
+import { ReasonPhrases, StatusCodes, getReasonPhrase } from 'http-status-codes'
 
 export class SuccessResponse {
   constructor({ message, statusCode, metadata, options }) {
@@ -16,14 +16,24 @@ export class SuccessResponse {
 
 // OK
 export class OKSuccess extends SuccessResponse {
-  constructor({ message, metadata, options }) {
-    super({ message, statusCode: StatusCodes.OK, metadata, options })
+  constructor(config = { message: ReasonPhrases.OK, metadata: {}, options: {} }) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.OK,
+      metadata: config.metadata,
+      options: config.options,
+    })
   }
 }
 
 // CREATED
 export class CreatedSuccess extends SuccessResponse {
-  constructor({ message, metadata, options }) {
-    super({ message, statusCode: StatusCodes.CREATED, metadata, options })
+  constructor(config = { message: ReasonPhrases.CREATED, metadata: {}, options: {} }) {
+    super({
+      message: config.message,
+      statusCode: StatusCodes.CREATED,
+      metadata: config.metadata,
+      options: config.options,
+    })
   }
 }

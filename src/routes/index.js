@@ -21,8 +21,7 @@ router.get(
 )
 
 router.use((req, res, next) => {
-  const err = new NotFoundException(`URL Not Found: ${req.url} `)
-  return next(err)
+  return next(new NotFoundException({ message: `URL Not Found: ${req.url} ` }))
 })
 
 export default router

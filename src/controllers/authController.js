@@ -9,6 +9,7 @@ import {
   signRefreshToken,
 } from '~/services/jwtService'
 import { getUserByEmail } from '~/services/userService'
+import { omitKeys } from '~/helpers/lodash'
 
 const setCookieSignInSuccess = (res, { accessToken, refreshToken }) => {
   // set cookie after sign up / sign in
@@ -32,7 +33,7 @@ export const signUp = async (req, res, next) => {
   const { email, password, displayName } = req.body
   const user = await User.findOne({ email }).lean()
 
-  if (user) throw new ConflictException('User already exists')
+  if (user) throw new ConflictException({ message: 'User already exists' })
 
   const newUser = await User.create({
     displayName,
@@ -40,15 +41,20 @@ export const signUp = async (req, res, next) => {
     password: await bcrypt.hash(password, 10),
   })
 
-  const payload = { sub: newUser._id, email: newUser.email }
+  const payload = { _id: newUser._id, email: newUser.email }
 
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
+  const updateRT = await User.updateOne({ email: newUser.email }, { refreshToken })
+
   // response
-  new CreatedSuccess().json(res)
+  new CreatedSuccess({
+    message: 'Sign up success',
+    metadata: { user: omitKeys(newUser.toJSON(), ['password', '__v', 'updatedAt', 'createdAt']) },
+  }).json(res)
 }
 
 /**
@@ -57,17 +63,20 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
   const user = req.user
 
-  const payload = { sub: user._id, email: user.email }
+  const payload = { _id: user._id, email: user.email }
 
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
-  const testUser = await getUserByEmail(user.email)
+  const updateRT = await User.updateOne({ email: user.email }, { refreshToken })
 
   // response
-  new OKSuccess({ metadata: testUser }).json(res)
+  new OKSuccess({
+    message: 'Sign in success',
+    metadata: { user: omitKeys(user, ['password']) },
+  }).json(res)
 }
 
 /**
@@ -75,22 +84,24 @@ export const signIn = async (req, res, next) => {
  */
 export const signInGoogle = (req, res, next) => {
   const redirectUrl = req.query.redirectUrl
-  req.session.redirectUrl = redirectUrl
+  req.session.redirectUrl = redirectUrl // save redirectUrl to session
   res.redirect('/auth/google')
 }
 
 /**
  * signInGoogleCallback
  */
-export const signInGoogleCallback = (req, res, next) => {
+export const signInGoogleCallback = async (req, res, next) => {
   const user = req.user
 
-  const payload = { sub: user._id, email: user.email }
+  const payload = { _id: user._id, email: user.email }
 
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
+
+  const updateRT = await User.updateOne({ email: user.email }, { refreshToken })
 
   // redirect to client
   // return res.redirect(req.session.redirectUrl)

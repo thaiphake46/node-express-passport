@@ -6,6 +6,7 @@ import { verifyJwtTokenCookie } from '~/middlewares/authMiddleware'
 const route = express.Router()
 
 /**
+ * [GET] /users/profile
  * route -> verifyJwtTokenCookie -> controller: response json
  */
 route.get('/profile', verifyJwtTokenCookie, asyncHandler(userProfile))
