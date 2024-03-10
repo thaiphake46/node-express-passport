@@ -15,7 +15,7 @@ export default function appPassport() {
   // passport local
   passport.use(
     new LocalStrategy(
-      { usernameField: 'email', passwordField: 'password' },
+      { usernameField: 'email', passwordField: 'password', session: true },
       async (email, password, done) => {
         try {
           const user = await getUserByEmail(email)

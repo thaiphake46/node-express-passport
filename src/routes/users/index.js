@@ -3,12 +3,12 @@ import { userProfile } from '~/controllers/userController'
 import asyncHandler from '~/helpers/asyncHandler'
 import { verifyJwtTokenCookie } from '~/middlewares/authMiddleware'
 
-const route = express.Router()
+const router = express.Router()
 
 /**
  * [GET] /users/profile
- * route -> verifyJwtTokenCookie -> controller: response json
+ * router -> verifyJwtTokenCookie -> controller: response json
  */
-route.get('/profile', verifyJwtTokenCookie, asyncHandler(userProfile))
+router.get('/profile', verifyJwtTokenCookie, asyncHandler(userProfile))
 
-export default route
+export default router

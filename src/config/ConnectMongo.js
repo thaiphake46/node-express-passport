@@ -8,8 +8,8 @@ class ConnectMongo {
     this.connect()
   }
 
-  connect = function () {
-    mongoose
+  connect = async function () {
+    return mongoose
       .connect(MONGO_CONNECT_STRING)
       .then(() => {
         // eslint-disable-next-line no-console

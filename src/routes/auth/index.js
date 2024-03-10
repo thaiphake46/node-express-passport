@@ -1,6 +1,13 @@
 import express from 'express'
 import asyncHandler from '~/helpers/asyncHandler'
-import { signIn, signInGoogle, signInGoogleCallback, signUp } from '~/controllers/authController'
+import {
+  logOut,
+  signIn,
+  signInGoogle,
+  signInGoogleCallback,
+  signInPage,
+  signUp,
+} from '~/controllers/authController'
 import {
   middlewarePassportGoogle,
   middlewarePassportGoogleCallback,
@@ -24,6 +31,12 @@ router.get('/google', middlewarePassportGoogle)
 router.get('/google/callback', middlewarePassportGoogleCallback, asyncHandler(signInGoogleCallback))
 
 /**
+ * [GET] /auth/signin
+ * -> return view sign in
+ */
+router.get('/signin', signInPage)
+
+/**
  * [POST] /auth/signup
  */
 router.post('/signup', validationReqBody(signUpValid), asyncHandler(signUp))
@@ -37,5 +50,10 @@ router.post(
   middlewarePassportLocal,
   asyncHandler(signIn),
 )
+
+/**
+ * [POST] /auth/logout
+ */
+router.post('/logout', asyncHandler(logOut))
 
 export default router

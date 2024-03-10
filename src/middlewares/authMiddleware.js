@@ -1,8 +1,8 @@
-import jwt, { decode } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import passport from 'passport'
 import env from '~/config/env'
 import { UnauthorizedException } from '~/core/ErrorResponse'
-import { JWT_MAX_AGE_ACCESS_TOKEN, signAccessToken } from '~/services/jwtService'
+import { signAccessToken } from '~/services/jwtService'
 import { getUserById } from '~/services/userService'
 
 /**
@@ -11,11 +11,12 @@ import { getUserById } from '~/services/userService'
 export const middlewarePassportLocal = (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if (err) return next(err)
-
     if (!user) return next(new UnauthorizedException({ message: info.message }))
 
-    req.user = user
-    next()
+    req.login(user, (err) => {
+      if (err) return next(err)
+      return next()
+    })
   })(req, res, next)
 }
 
@@ -52,13 +53,10 @@ export const middlewarePassportGoogleCallback = (req, res, next) => {
 }
 
 /**
- *
+ * verifyJwtTokenCookie
  */
 export const verifyJwtTokenCookie = async (req, res, next) => {
   let { accessToken, refreshToken } = req.cookies
-
-  console.log('verifyJwtTokenCookie', __filename)
-  console.log('cookies', req.cookies)
 
   /**
    * TODO
@@ -79,26 +77,33 @@ export const verifyJwtTokenCookie = async (req, res, next) => {
 
     const decodeRT = jwt.verify(refreshToken, env.JWT_SECRET_REFRESH_TOKEN)
 
-    console.log(__filename, 'verifyJwtTokenCookie', decodeRT)
-
     const user = await getUserById(decodeRT.sub)
 
-    console.log(__filename, 'verifyJwtTokenCookie', user)
-
-    if (refreshToken !== user.refreshToken) {
+    if (refreshToken !== user?.refreshToken) {
       return next(new UnauthorizedException({ message: 'Login session expired' }))
     }
 
-    // accessToken = signAccessToken()
-    accessToken = jwt.sign({ email: user.email }, env.JWT_SECRET_ACCESS_TOKEN, {
-      expiresIn: JWT_MAX_AGE_ACCESS_TOKEN / 1000, // thời gian tính bằng giây (second)
-      subject: user._id.toString(),
-    })
+    const payload = { email: user.email, _id: user._id }
+
+    accessToken = signAccessToken(payload)
 
     return res.json({ accessToken, refreshToken })
   }
   return res.json({ accessToken, refreshToken })
+}
+/**
+ *
+ * @param {Request} req
+ * @param {*} res
+ */
+export const checkAuth = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    if (req.path === '/auth/signup' || req.path === '/auth/signin') {
+      res.redirect('/')
+    }
 
-  // req.user = decodeAT
-  // next()
+    return next()
+  } else {
+    return res.redirect('/login')
+  }
 }

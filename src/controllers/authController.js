@@ -8,7 +8,6 @@ import {
   signAccessToken,
   signRefreshToken,
 } from '~/services/jwtService'
-import { getUserByEmail } from '~/services/userService'
 import { omitKeys } from '~/helpers/lodash'
 
 const setCookieSignInSuccess = (res, { accessToken, refreshToken }) => {
@@ -24,6 +23,13 @@ const setCookieSignInSuccess = (res, { accessToken, refreshToken }) => {
       maxAge: JWT_MAX_AGE_REFRESH_TOKEN,
       sameSite: 'strict',
     })
+}
+
+/**
+ * signUpPage
+ */
+export const signUpPage = (req, res, next) => {
+  res.render('auth/signup')
 }
 
 /**
@@ -48,13 +54,20 @@ export const signUp = async (req, res, next) => {
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
-  const updateRT = await User.updateOne({ email: newUser.email }, { refreshToken })
+  await User.updateOne({ email: newUser.email }, { refreshToken })
 
   // response
   new CreatedSuccess({
     message: 'Sign up success',
     metadata: { user: omitKeys(newUser.toJSON(), ['password', '__v', 'updatedAt', 'createdAt']) },
   }).json(res)
+}
+
+/**
+ * signInPage
+ */
+export const signInPage = (req, res, next) => {
+  res.render('auth/signin')
 }
 
 /**
@@ -70,13 +83,27 @@ export const signIn = async (req, res, next) => {
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
 
-  const updateRT = await User.updateOne({ email: user.email }, { refreshToken })
+  await User.updateOne({ email: user.email }, { refreshToken })
 
   // response
   new OKSuccess({
     message: 'Sign in success',
     metadata: { user: omitKeys(user, ['password']) },
   }).json(res)
+}
+
+export const logOut = async (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err)
+
+    req.session.destroy((err) => {
+      if (err) return next(err)
+    })
+
+    res.clearCookie('accessToken').clearCookie('refreshToken')
+
+    new OKSuccess({ message: 'Logout success' }).json(res)
+  })
 }
 
 /**
@@ -100,8 +127,7 @@ export const signInGoogleCallback = async (req, res, next) => {
   const refreshToken = signRefreshToken(payload)
 
   setCookieSignInSuccess(res, { accessToken, refreshToken })
-
-  const updateRT = await User.updateOne({ email: user.email }, { refreshToken })
+  await User.updateOne({ email: user.email }, { refreshToken })
 
   // redirect to client
   // return res.redirect(req.session.redirectUrl)
